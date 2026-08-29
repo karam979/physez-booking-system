@@ -69,3 +69,17 @@ docker/               Postgres first-run init (creates physez_test)
 - One API error shape everywhere: `{ "error": { "code", "message", "details" } }`
 - JWT auth in a Secure HttpOnly cookie; roles enforced server-side
 - Prettier + ESLint: `npm run format` (root), `npm run lint` (each package)
+
+## Copyright
+
+© 2026 Karam Shekh Yusuf. All rights reserved.
+
+This project, including its source code, system design, documentation, user interface, learning
+content, course structure, quizzes, and future platform concepts, is the intellectual property of
+Karam Shekh Yusuf.
+
+No permission is granted to copy, modify, distribute, sublicense, sell, publish, reuse, or use this
+project or any part of it for commercial, educational, or public purposes without prior written
+permission from the owner.
+
+This repository is shared for project presentation and portfolio review purposes only.
