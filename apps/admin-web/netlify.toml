@@ -1,0 +1,31 @@
+# Netlify config for the PhysEZ admin app.
+# Set "base" to this directory in the Netlify site settings, or deploy this
+# folder directly.
+
+[build]
+  command = "npm run build"
+  publish = "dist"
+
+# Proxies to the API on the VPS. Keeping the browser same-origin with the API
+# means the auth cookie needs no cross-site handling (DESIGN.md §7).
+# public/_redirects carries the same two rules as a fallback.
+[[redirects]]
+  from = "/api/*"
+  to = "https://auto-flows-979.duckdns.org/api/:splat"
+  status = 200
+  force = true
+
+# Single-page app: every other path is served by the React router.
+[[redirects]]
+  from = "/*"
+  to = "/index.html"
+  status = 200
+
+[[headers]]
+  for = "/*"
+  [headers.values]
+    X-Content-Type-Options = "nosniff"
+    X-Frame-Options = "DENY"
+    Referrer-Policy = "strict-origin-when-cross-origin"
+    # The admin app is not for search engines.
+    X-Robots-Tag = "noindex, nofollow"

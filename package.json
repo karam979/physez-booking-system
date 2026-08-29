@@ -1,0 +1,13 @@
+{
+  "name": "physez",
+  "private": true,
+  "version": "0.0.0",
+  "description": "Repo-level tooling only (Prettier). App code lives in apps/ and server/.",
+  "scripts": {
+    "format": "prettier --write .",
+    "format:check": "prettier --check ."
+  },
+  "devDependencies": {
+    "prettier": "^3.8.0"
+  }
+}

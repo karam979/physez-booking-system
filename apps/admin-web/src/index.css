@@ -1,0 +1,699 @@
+/* PhysEZ admin app ג€” dark "lab notebook" theme.
+   Logical properties (inline/block) keep every layout correct in RTL without
+   direction-specific overrides. All color comes from the tokens below. */
+
+:root {
+  --bg: #0b1120;
+  --bg-grid: rgba(122, 152, 205, 0.05);
+  --surface: #121c30;
+  --surface-raised: #16223a;
+  --border: #263450;
+  --border-strong: #35476b;
+  --text: #e8eef8;
+  --muted: #97a8c4;
+  --accent: #38d3bd; /* links, focus, selected states */
+  --accent-strong: #2fd0ba; /* filled buttons */
+  --accent-strong-hover: #29bda8;
+  --accent-soft: rgba(56, 211, 189, 0.13);
+  --button-fg: #06231d;
+  --amber: #f6c453; /* shared brand accent across both apps */
+  --amber-soft: rgba(246, 196, 83, 0.12);
+  --danger-text: #f5a9a2;
+  --danger-soft: rgba(229, 96, 82, 0.12);
+  --danger-border: rgba(229, 96, 82, 0.35);
+  --ok-text: #7ee2b8;
+  --ok-soft: rgba(46, 190, 125, 0.12);
+  --ok-border: rgba(46, 190, 125, 0.32);
+  --info-text: #a9bcf5;
+  --info-soft: rgba(120, 145, 235, 0.14);
+  --info-border: rgba(120, 145, 235, 0.35);
+  --radius: 10px;
+  --radius-small: 7px;
+  --shadow: 0 10px 28px rgba(3, 8, 20, 0.45);
+  --font-body:
+    'Inter Variable', system-ui, 'Segoe UI', 'Noto Sans Hebrew', 'Noto Sans Arabic', sans-serif;
+  --font-display:
+    'Space Grotesk Variable', 'Inter Variable', system-ui, 'Segoe UI', 'Noto Sans Hebrew',
+    'Noto Sans Arabic', sans-serif;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html {
+  background: var(--bg);
+}
+
+body {
+  margin: 0;
+  font-family: var(--font-body);
+  /* Faint graph-paper grid: the one physics motif that is always on. */
+  background:
+    linear-gradient(var(--bg-grid) 1px, transparent 1px) 0 0 / 100% 36px,
+    linear-gradient(90deg, var(--bg-grid) 1px, transparent 1px) 0 0 / 36px 100%,
+    var(--bg);
+  color: var(--text);
+  line-height: 1.55;
+  caret-color: var(--accent);
+}
+
+::selection {
+  background: rgba(56, 211, 189, 0.32);
+  color: var(--text);
+}
+
+/* Firefox + WebKit scrollbars, themed to the surface palette. */
+* {
+  scrollbar-color: var(--border-strong) transparent;
+}
+
+::-webkit-scrollbar {
+  width: 10px;
+  height: 10px;
+}
+
+::-webkit-scrollbar-thumb {
+  background: var(--border-strong);
+  border-radius: 999px;
+  border: 2px solid var(--bg);
+}
+
+:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+  border-radius: var(--radius-small);
+}
+
+h1,
+h2 {
+  font-family: var(--font-display);
+  letter-spacing: -0.01em;
+  text-wrap: balance;
+  margin-block: 0 0.25em;
+}
+
+h1 {
+  font-size: clamp(1.55rem, 3vw, 2rem);
+}
+
+h2 {
+  font-size: 1.15rem;
+  color: var(--muted);
+  margin-block-start: 0.75em;
+}
+
+/* Layout ------------------------------------------------------------------ */
+
+.layout {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+}
+
+.header {
+  position: sticky;
+  inset-block-start: 0;
+  z-index: 10;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  padding: 0.7rem 1.25rem;
+  background: rgba(11, 17, 32, 0.82);
+  backdrop-filter: blur(10px);
+  border-block-end: 1px solid var(--border);
+}
+
+.brand {
+  font-family: var(--font-display);
+  font-weight: 700;
+  font-size: 1.2rem;
+  color: var(--text);
+  text-decoration: none;
+  letter-spacing: -0.01em;
+}
+
+/* The amber period is the whole logo: Physֲ·EZ measurement dot. */
+.brand::after {
+  content: '.';
+  color: var(--amber);
+}
+
+.nav {
+  display: flex;
+  align-items: center;
+  gap: 1.1rem;
+  flex-wrap: wrap;
+}
+
+.nav a {
+  color: var(--muted);
+  text-decoration: none;
+  padding-block: 0.2rem;
+  border-block-end: 2px solid transparent;
+  transition: color 120ms ease-out;
+}
+
+.nav a:hover {
+  color: var(--text);
+}
+
+.nav a.active {
+  color: var(--text);
+  border-block-end-color: var(--amber);
+}
+
+.main {
+  flex: 1;
+  width: 100%;
+  max-width: 46rem;
+  margin-inline: auto;
+  padding: 2rem 1.25rem 4rem;
+}
+
+/* Landing hero ------------------------------------------------------------ */
+
+.hero {
+  position: relative;
+  text-align: center;
+  padding-block: 4.5rem 3.5rem;
+  display: grid;
+  gap: 1.1rem;
+  justify-items: center;
+}
+
+/* Two out-of-phase waves ג€” interference, drawn once, kept faint. */
+.hero::before {
+  content: '';
+  position: absolute;
+  inset-inline: -10%;
+  inset-block-start: 0;
+  height: 100%;
+  pointer-events: none;
+  background: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 720 160' preserveAspectRatio='none'%3E%3Cpath d='M0 80 C 60 20 120 20 180 80 S 300 140 360 80 420 20 480 80 600 140 720 80' fill='none' stroke='%2338d3bd' stroke-width='1.6'/%3E%3Cpath d='M0 80 C 60 140 120 140 180 80 S 300 20 360 80 420 140 480 80 600 20 720 80' fill='none' stroke='%23f6c453' stroke-width='1.6'/%3E%3C/svg%3E")
+    center / 100% 160px no-repeat;
+  opacity: 0.28;
+}
+
+.hero > * {
+  position: relative;
+  animation: rise 640ms cubic-bezier(0.16, 1, 0.3, 1) backwards;
+}
+
+.hero > *:nth-child(2) {
+  animation-delay: 90ms;
+}
+
+.hero > *:nth-child(3) {
+  animation-delay: 180ms;
+}
+
+@keyframes rise {
+  from {
+    opacity: 0;
+    transform: translateY(14px);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .hero > * {
+    animation: none;
+  }
+}
+
+.hero h1 {
+  font-size: clamp(2rem, 5.5vw, 3rem);
+  max-width: 18ch;
+}
+
+.hero .muted {
+  max-width: 52ch;
+}
+
+/* Surfaces ---------------------------------------------------------------- */
+
+.card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 1.4rem;
+  box-shadow: var(--shadow);
+}
+
+.form-card {
+  max-width: 26rem;
+  margin-inline: auto;
+  display: grid;
+  gap: 1rem;
+}
+
+.stack {
+  display: grid;
+  gap: 1rem;
+}
+
+/* Buttons keep their content width inside stacked layouts (grid children
+   stretch by default, which turns every CTA into a full-width bar). */
+.stack > .button,
+.stack > .button-secondary {
+  justify-self: start;
+}
+
+.muted {
+  color: var(--muted);
+}
+
+/* Forms ------------------------------------------------------------------- */
+
+label {
+  display: grid;
+  gap: 0.4rem;
+  font-weight: 500;
+  font-size: 0.95rem;
+}
+
+input,
+select,
+textarea {
+  font: inherit;
+  padding: 0.55rem 0.7rem;
+  border: 1px solid var(--border-strong);
+  border-radius: var(--radius-small);
+  background: var(--bg);
+  color: var(--text);
+  transition: border-color 120ms ease-out;
+}
+
+input::placeholder,
+textarea::placeholder {
+  color: var(--muted);
+}
+
+input:hover,
+select:hover,
+textarea:hover {
+  border-color: var(--accent);
+}
+
+/* Date/time picker glyphs are near-invisible on dark backgrounds. */
+input[type='date'],
+input[type='time'] {
+  color-scheme: dark;
+}
+
+/* Buttons ----------------------------------------------------------------- */
+
+.button,
+.button-secondary {
+  display: inline-block;
+  font: inherit;
+  font-weight: 600;
+  padding: 0.55rem 1.25rem;
+  border-radius: var(--radius-small);
+  border: 1px solid transparent;
+  cursor: pointer;
+  text-decoration: none;
+  text-align: center;
+  transition:
+    background 120ms ease-out,
+    border-color 120ms ease-out;
+}
+
+.button {
+  background: var(--accent-strong);
+  color: var(--button-fg);
+}
+
+.button:hover {
+  background: var(--accent-strong-hover);
+}
+
+.button:disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
+}
+
+.button-secondary {
+  background: transparent;
+  color: var(--text);
+  border-color: var(--border-strong);
+}
+
+.button-secondary:hover {
+  border-color: var(--accent);
+}
+
+.link-button {
+  font: inherit;
+  background: none;
+  border: none;
+  color: var(--muted);
+  cursor: pointer;
+  padding: 0;
+}
+
+.link-button:hover {
+  color: var(--text);
+}
+
+a {
+  color: var(--accent);
+}
+
+/* Feedback ---------------------------------------------------------------- */
+
+.error {
+  color: var(--danger-text);
+  background: var(--danger-soft);
+  border: 1px solid var(--danger-border);
+  border-radius: var(--radius-small);
+  padding: 0.55rem 0.8rem;
+}
+
+.notice {
+  color: var(--ok-text);
+  background: var(--ok-soft);
+  border: 1px solid var(--ok-border);
+  border-radius: var(--radius-small);
+  padding: 0.55rem 0.8rem;
+}
+
+/* Wizard ------------------------------------------------------------------ */
+
+.steps {
+  display: flex;
+  gap: 0.4rem;
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  flex-wrap: wrap;
+  counter-reset: step;
+}
+
+.steps li {
+  counter-increment: step;
+  display: flex;
+  align-items: center;
+  gap: 0.45rem;
+  padding: 0.3rem 0.85rem 0.3rem 0.5rem;
+  padding-inline: 0.5rem 0.85rem;
+  border-radius: 999px;
+  border: 1px solid var(--border);
+  color: var(--muted);
+  font-size: 0.88rem;
+  background: var(--surface);
+}
+
+/* The step number carries the sequence ג€” rendered as a small dial. */
+.steps li::before {
+  content: counter(step);
+  display: grid;
+  place-items: center;
+  inline-size: 1.35rem;
+  block-size: 1.35rem;
+  border-radius: 50%;
+  background: var(--bg);
+  border: 1px solid var(--border-strong);
+  font-family: var(--font-display);
+  font-size: 0.75rem;
+  font-variant-numeric: tabular-nums;
+}
+
+.steps li.step-active {
+  color: var(--text);
+  border-color: var(--accent);
+}
+
+.steps li.step-active::before {
+  background: var(--accent-strong);
+  border-color: var(--accent-strong);
+  color: var(--button-fg);
+}
+
+.wizard-nav {
+  display: flex;
+  justify-content: space-between;
+  gap: 1rem;
+}
+
+.wizard-nav .button:only-child {
+  margin-inline-start: auto;
+}
+
+/* Choice buttons ---------------------------------------------------------- */
+
+.choice-row {
+  display: flex;
+  gap: 0.75rem;
+  flex-wrap: wrap;
+}
+
+.choice-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(6rem, 1fr));
+  gap: 0.5rem;
+}
+
+.choice {
+  font: inherit;
+  color: var(--text);
+  padding: 0.6rem 1rem;
+  border: 1px solid var(--border-strong);
+  border-radius: var(--radius-small);
+  background: var(--bg);
+  cursor: pointer;
+  text-align: center;
+  font-variant-numeric: tabular-nums;
+  transition: border-color 120ms ease-out;
+}
+
+.choice:hover {
+  border-color: var(--accent);
+}
+
+.choice-wide {
+  text-align: start;
+}
+
+.choice-selected {
+  border-color: var(--accent);
+  background: var(--accent-soft);
+}
+
+/* Summaries + booking cards ----------------------------------------------- */
+
+.summary {
+  margin: 0;
+  display: grid;
+  gap: 0.55rem;
+}
+
+.summary-row {
+  display: flex;
+  justify-content: space-between;
+  gap: 1rem;
+}
+
+.summary-row dt {
+  color: var(--muted);
+}
+
+.summary-row dd {
+  margin: 0;
+  font-weight: 500;
+  text-align: end;
+}
+
+.booking-card {
+  display: block;
+  text-decoration: none;
+  color: inherit;
+  transition: border-color 120ms ease-out;
+}
+
+.booking-card:hover {
+  border-color: var(--accent);
+}
+
+.booking-card-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 1rem;
+}
+
+.badge {
+  padding: 0.14rem 0.65rem;
+  border-radius: 999px;
+  font-size: 0.85rem;
+  font-weight: 600;
+  white-space: nowrap;
+  border: 1px solid transparent;
+}
+
+.badge-pending {
+  background: var(--amber-soft);
+  color: var(--amber);
+  border-color: rgba(246, 196, 83, 0.35);
+}
+
+.badge-confirmed {
+  background: var(--ok-soft);
+  color: var(--ok-text);
+  border-color: var(--ok-border);
+}
+
+.badge-rejected,
+.badge-cancelled {
+  background: var(--danger-soft);
+  color: var(--danger-text);
+  border-color: var(--danger-border);
+}
+
+.badge-completed {
+  background: var(--info-soft);
+  color: var(--info-text);
+  border-color: var(--info-border);
+}
+
+.language-switcher {
+  padding: 0.3rem 0.5rem;
+  background: var(--bg);
+  border-color: var(--border-strong);
+}
+
+/* Admin-specific pieces ---------------------------------------------------- */
+
+.stat-row {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(11rem, 1fr));
+  gap: 1rem;
+}
+
+/* Counts read as instrument readouts: number and label on one line. */
+.stat {
+  display: flex;
+  align-items: baseline;
+  gap: 0.6rem;
+  padding: 1rem 1.25rem;
+}
+
+.stat-number {
+  font-family: var(--font-display);
+  font-size: 1.9rem;
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+  color: var(--amber);
+}
+
+.filter-row {
+  display: flex;
+  align-items: end;
+  gap: 1rem;
+  flex-wrap: wrap;
+}
+
+.table-wrap {
+  overflow-x: auto;
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow);
+}
+
+.table {
+  width: 100%;
+  border-collapse: collapse;
+  background: var(--surface);
+  font-variant-numeric: tabular-nums;
+}
+
+.table th,
+.table td {
+  padding: 0.65rem 0.9rem;
+  text-align: start;
+  border-block-end: 1px solid var(--border);
+}
+
+.table tbody tr:last-child td {
+  border-block-end: none;
+}
+
+.table tbody tr:hover {
+  background: var(--surface-raised);
+}
+
+.table th {
+  color: var(--muted);
+  font-weight: 600;
+  font-size: 0.85rem;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+.window-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  gap: 0.45rem;
+  font-variant-numeric: tabular-nums;
+}
+
+.window-list li {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.icon-button {
+  display: inline-grid;
+  place-items: center;
+  inline-size: 1.75rem;
+  block-size: 1.75rem;
+  padding: 0;
+  border: 1px solid var(--border-strong);
+  border-radius: var(--radius-small);
+  background: transparent;
+  color: var(--muted);
+  cursor: pointer;
+  transition:
+    color 120ms ease-out,
+    border-color 120ms ease-out;
+}
+
+.icon-button:hover {
+  color: var(--danger-text);
+  border-color: var(--danger-border);
+}
+
+/* File list */
+
+.file-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  gap: 0.5rem;
+}
+
+.file-list li {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  padding-block: 0.35rem;
+  border-block-end: 1px solid var(--border);
+}
+
+.file-list li:last-child {
+  border-block-end: none;
+}
+
+.file-list li a {
+  flex: 1;
+  overflow-wrap: anywhere;
+}
+
+.file-input {
+  gap: 0.5rem;
+}

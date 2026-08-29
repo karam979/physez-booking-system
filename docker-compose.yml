@@ -1,0 +1,24 @@
+services:
+  postgres:
+    image: postgres:16
+    container_name: physez-postgres
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: physez
+      POSTGRES_PASSWORD: physez
+      POSTGRES_DB: physez
+    ports:
+      - '5432:5432'
+    volumes:
+      - physez_pgdata:/var/lib/postgresql/data
+      # Creates the physez_test database on first startup (integration tests
+      # run against it so they never touch dev data).
+      - ./docker/postgres-init:/docker-entrypoint-initdb.d:ro
+    healthcheck:
+      test: ['CMD-SHELL', 'pg_isready -U physez -d physez']
+      interval: 5s
+      timeout: 3s
+      retries: 10
+
+volumes:
+  physez_pgdata:

@@ -1,0 +1,11 @@
+# PhysEZ nightly backup at 02:30 server time.
+# Install with:
+#   sudo cp deploy/physez-backup.cron /etc/cron.d/physez-backup
+#   sudo chmod 644 /etc/cron.d/physez-backup
+#
+# Output goes to the log so a failed backup is visible the next morning.
+
+SHELL=/bin/bash
+PATH=/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin
+
+30 2 * * * physez /srv/physez/deploy/backup.sh >> /var/log/physez-backup.log 2>&1

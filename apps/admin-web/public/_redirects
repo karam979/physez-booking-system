@@ -1,0 +1,2 @@
+/api/* https://auto-flows-979.duckdns.org/api/:splat 200!
+/* /index.html 200

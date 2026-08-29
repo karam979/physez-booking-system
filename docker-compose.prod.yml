@@ -1,0 +1,68 @@
+# PhysEZ API as a service in the existing VPS stack.
+#
+# This file defines ONLY the API. PostgreSQL, n8n and Caddy already run on the
+# VPS and are reached over the shared external network below.
+#
+#   docker compose -f docker-compose.prod.yml up -d --build
+#
+# The root docker-compose.yml is the local development database and is not
+# used in production.
+
+services:
+  physez_api:
+    build:
+      context: ./server
+    image: physez-api:latest
+    container_name: physez_api
+    restart: always
+    # Reaps zombies and forwards signals so the container stops cleanly.
+    init: true
+
+    # Secrets stay in this file on the VPS; it is gitignored and never copied
+    # into the image (see server/.dockerignore).
+    env_file:
+      - ./server/.env
+
+    # These override anything in .env so the container is always internally
+    # consistent, whatever the host file happens to say.
+    environment:
+      NODE_ENV: production
+      PORT: 3000
+      UPLOAD_DIR: /app/uploads
+
+    # No host ports: Caddy reaches the API by service name on the shared
+    # network, so the only public entry point stays the reverse proxy.
+    expose:
+      - '3000'
+
+    # Uploaded files must outlive image rebuilds (DESIGN.md §8 backups).
+    volumes:
+      - physez_uploads:/app/uploads
+
+    networks:
+      - physez_shared
+
+    healthcheck:
+      # The health endpoint also checks database reachability, so an unhealthy
+      # container means the API cannot serve real traffic.
+      test:
+        [
+          'CMD',
+          'node',
+          '-e',
+          "fetch('http://127.0.0.1:3000/api/health').then(r => process.exit(r.ok ? 0 : 1)).catch(() => process.exit(1))",
+        ]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+      start_period: 20s
+
+volumes:
+  physez_uploads:
+
+networks:
+  physez_shared:
+    external: true
+    # REPLACE with the network your Postgres, n8n and Caddy containers share.
+    # List candidates with: docker network ls
+    name: REPLACE-WITH-EXISTING-NETWORK

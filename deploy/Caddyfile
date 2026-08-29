@@ -1,0 +1,47 @@
+# PhysEZ API — Caddy reverse proxy.
+# Caddy obtains and renews the TLS certificate automatically, so there is no
+# certbot step. Replace the hostname, then:
+#   sudo caddy validate --config /etc/caddy/Caddyfile
+#   sudo systemctl reload caddy
+
+REPLACE-WITH-API-HOST {
+	encode zstd gzip
+
+	# Uploads are capped at MAX_UPLOAD_MB in the API; keep a little headroom
+	# here so the API returns 413 FILE_TOO_LARGE in the canonical error shape
+	# instead of Caddy rejecting the request with its own error page.
+	request_body {
+		max_size 12MB
+	}
+
+	header {
+		Strict-Transport-Security "max-age=31536000; includeSubDomains"
+		X-Content-Type-Options "nosniff"
+		X-Frame-Options "DENY"
+		Referrer-Policy "strict-origin-when-cross-origin"
+		-Server
+	}
+
+	# Only /api/* is public. The upload directory is never served from here —
+	# files go through GET /api/files/:fileId after an ownership check.
+	handle /api/* {
+		reverse_proxy 127.0.0.1:3000
+	}
+
+	handle {
+		respond "Not found" 404
+	}
+
+	log {
+		output file /var/log/caddy/physez-api.log
+		format json
+	}
+}
+
+# n8n on the same VPS, behind its own hostname. The editor should be
+# restricted (basic auth or an IP allow-list) — webhooks stay reachable
+# because the workflows verify the shared secret themselves.
+#
+# REPLACE-WITH-N8N-HOST {
+# 	reverse_proxy 127.0.0.1:5678
+# }

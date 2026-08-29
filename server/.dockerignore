@@ -1,0 +1,25 @@
+# Keep the build context small and never bake secrets or local state into the
+# image. Environment comes from env_file at runtime.
+
+node_modules
+npm-debug.log*
+
+# Secrets — the container reads these from env_file, never from the image.
+.env
+.env.*
+!.env.example
+
+# Local uploads: production mounts a volume at UPLOAD_DIR instead.
+uploads
+
+# Not needed at runtime.
+tests
+vitest.config.js
+eslint.config.js
+Dockerfile
+.dockerignore
+
+# Local junk.
+*.log
+.DS_Store
+coverage

@@ -1,0 +1,76 @@
+{
+  "name": "PhysEZ — Telegram alert on new booking",
+  "nodes": [
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "booking-created",
+        "responseMode": "onReceived",
+        "options": {}
+      },
+      "id": "webhook-booking-created",
+      "name": "Webhook: booking-created",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2,
+      "position": [-260, 0],
+      "webhookId": "physez-booking-created"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": { "caseSensitive": true, "version": 2 },
+          "conditions": [
+            {
+              "leftValue": "={{ $json.headers['x-physez-secret'] }}",
+              "rightValue": "={{ $env.PHYSEZ_SHARED_SECRET }}",
+              "operator": { "type": "string", "operation": "equals" }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "id": "check-secret",
+      "name": "Shared secret valid?",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2,
+      "position": [-40, 0]
+    },
+    {
+      "parameters": {
+        "chatId": "={{ $env.TELEGRAM_CHAT_ID }}",
+        "text": "=🔔 New PhysEZ booking request\n\nStudent: {{ $json.body.student.name }} ({{ $json.body.student.email }})\nTopic: {{ $json.body.topic.nameEn }}\nType: {{ $json.body.lessonType }}\nWhen: {{ new Date($json.body.startAt).toLocaleString('en-GB', { timeZone: $env.APP_TIMEZONE || 'UTC' }) }}\nNotes: {{ $json.body.notes || '—' }}\n\nReview it in the admin app.",
+        "additionalFields": {}
+      },
+      "id": "telegram-send",
+      "name": "Telegram: notify teacher",
+      "type": "n8n-nodes-base.telegram",
+      "typeVersion": 1.2,
+      "position": [200, -100],
+      "credentials": { "telegramApi": { "id": "REPLACE_ME", "name": "PhysEZ bot" } }
+    },
+    {
+      "parameters": {
+        "amount": 0
+      },
+      "id": "reject-unauthorized",
+      "name": "Ignore unauthorized call",
+      "type": "n8n-nodes-base.noOp",
+      "typeVersion": 1,
+      "position": [200, 100]
+    }
+  ],
+  "connections": {
+    "Webhook: booking-created": {
+      "main": [[{ "node": "Shared secret valid?", "type": "main", "index": 0 }]]
+    },
+    "Shared secret valid?": {
+      "main": [
+        [{ "node": "Telegram: notify teacher", "type": "main", "index": 0 }],
+        [{ "node": "Ignore unauthorized call", "type": "main", "index": 0 }]
+      ]
+    }
+  },
+  "settings": { "executionOrder": "v1" },
+  "pinData": {}
+}

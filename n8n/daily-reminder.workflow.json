@@ -1,0 +1,91 @@
+{
+  "name": "PhysEZ — Daily Telegram reminder for tomorrow's lessons",
+  "nodes": [
+    {
+      "parameters": {
+        "rule": {
+          "interval": [{ "field": "cronExpression", "expression": "0 18 * * *" }]
+        }
+      },
+      "id": "schedule",
+      "name": "Every day at 18:00",
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "typeVersion": 1.2,
+      "position": [-460, 0]
+    },
+    {
+      "parameters": {
+        "url": "={{ $env.PHYSEZ_API_BASE }}/api/internal/reminders/tomorrow",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [{ "name": "X-PhysEZ-Secret", "value": "={{ $env.PHYSEZ_SHARED_SECRET }}" }]
+        },
+        "options": {}
+      },
+      "id": "fetch-lessons",
+      "name": "PhysEZ API: tomorrow's lessons",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [-240, 0],
+      "notes": "Express owns all business state; n8n never queries Postgres directly."
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": { "caseSensitive": true, "version": 2 },
+          "conditions": [
+            {
+              "leftValue": "={{ $json.count }}",
+              "rightValue": 0,
+              "operator": { "type": "number", "operation": "gt" }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "id": "has-lessons",
+      "name": "Any lessons tomorrow?",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2,
+      "position": [-20, 0]
+    },
+    {
+      "parameters": {
+        "chatId": "={{ $env.TELEGRAM_CHAT_ID }}",
+        "text": "=📅 PhysEZ — lessons on {{ $json.date }} ({{ $json.count }}):\n\n{{ $json.lessons.map(l => `• ${new Date(l.startAt).toLocaleTimeString('en-GB', { timeZone: $json.timezone, hour: '2-digit', minute: '2-digit' })} — ${l.student.name} (${l.topic.nameEn}, ${l.lessonType})`).join('\\n') }}",
+        "additionalFields": {}
+      },
+      "id": "telegram-reminder",
+      "name": "Telegram: daily reminder",
+      "type": "n8n-nodes-base.telegram",
+      "typeVersion": 1.2,
+      "position": [220, -100],
+      "credentials": { "telegramApi": { "id": "REPLACE_ME", "name": "PhysEZ bot" } }
+    },
+    {
+      "parameters": {},
+      "id": "no-lessons",
+      "name": "Nothing to send",
+      "type": "n8n-nodes-base.noOp",
+      "typeVersion": 1,
+      "position": [220, 100]
+    }
+  ],
+  "connections": {
+    "Every day at 18:00": {
+      "main": [[{ "node": "PhysEZ API: tomorrow's lessons", "type": "main", "index": 0 }]]
+    },
+    "PhysEZ API: tomorrow's lessons": {
+      "main": [[{ "node": "Any lessons tomorrow?", "type": "main", "index": 0 }]]
+    },
+    "Any lessons tomorrow?": {
+      "main": [
+        [{ "node": "Telegram: daily reminder", "type": "main", "index": 0 }],
+        [{ "node": "Nothing to send", "type": "main", "index": 0 }]
+      ]
+    }
+  },
+  "settings": { "executionOrder": "v1" },
+  "pinData": {}
+}
