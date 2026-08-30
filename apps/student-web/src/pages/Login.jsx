@@ -19,7 +19,8 @@ export function Login() {
     setError(null)
     try {
       await login({ email, password })
-      navigate('/dashboard')
+      // Booking is what a student comes back to do; "My lessons" stays in the nav.
+      navigate('/book')
     } catch (err) {
       setError(err)
     } finally {
