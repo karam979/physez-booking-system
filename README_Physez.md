@@ -6,8 +6,8 @@ The system includes a student website, an admin dashboard, a Node.js backend, a 
 
 ## Live Project
 
-- Student website: https://physezstudents.netlify.app/
-- Admin dashboard: https://phyzezadmin.netlify.app/login
+- Student website: https://physezprojectstudent.netlify.app/
+- Admin dashboard: https://physezprijectadmin.netlify.app/
 - API health check: https://auto-flows-979.duckdns.org/api/health
 
 ## Main Features
