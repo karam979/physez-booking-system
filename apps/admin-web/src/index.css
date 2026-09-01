@@ -697,3 +697,34 @@ a {
 .file-input {
   gap: 0.5rem;
 }
+
+/* Community + credits */
+
+.question-body,
+.answer-body {
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+  margin: 0;
+}
+
+.accepted-flag {
+  margin: 0;
+  color: var(--ok-text);
+  font-weight: 600;
+}
+
+.credit-plus,
+.credit-minus {
+  min-inline-size: 2.75rem;
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+  text-align: end;
+}
+
+.credit-plus {
+  color: var(--ok-text);
+}
+
+.credit-minus {
+  color: var(--danger-text);
+}

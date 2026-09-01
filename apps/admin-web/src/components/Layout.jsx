@@ -21,6 +21,8 @@ export function Layout({ children }) {
               </NavLink>
               <NavLink to="/bookings">{t('nav.bookings')}</NavLink>
               <NavLink to="/availability">{t('nav.availability')}</NavLink>
+              <NavLink to="/community">{t('nav.community')}</NavLink>
+              <NavLink to="/credits">{t('nav.credits')}</NavLink>
               <button type="button" className="link-button" onClick={logout}>
                 {t('nav.logout')}
               </button>

@@ -18,6 +18,7 @@ export function Layout({ children }) {
             <>
               <NavLink to="/dashboard">{t('nav.dashboard')}</NavLink>
               <NavLink to="/book">{t('nav.book')}</NavLink>
+              <NavLink to="/community">{t('nav.community')}</NavLink>
               <NavLink to="/progress">{t('nav.progress')}</NavLink>
               <button type="button" className="link-button" onClick={logout}>
                 {t('nav.logout')}

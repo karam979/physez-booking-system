@@ -61,3 +61,37 @@ export function saveLesson(bookingId, { attendance, summary, homework, feedback 
 export function fileDownloadUrl(fileId) {
   return `/api/files/${fileId}`
 }
+
+export function listCommunityQuestions({ status, language } = {}) {
+  const params = new URLSearchParams()
+  if (status) params.set('status', status)
+  if (language) params.set('language', language)
+  const queryString = params.toString()
+  return apiFetch(`/admin/community/questions${queryString ? `?${queryString}` : ''}`)
+}
+
+export function getCommunityQuestion(id) {
+  return apiFetch(`/admin/community/questions/${id}`)
+}
+
+export function setQuestionStatus(id, status) {
+  return apiFetch(`/admin/community/questions/${id}/status`, { method: 'PATCH', body: { status } })
+}
+
+export function listCreditStudents(search) {
+  const params = new URLSearchParams()
+  if (search) params.set('search', search)
+  const queryString = params.toString()
+  return apiFetch(`/admin/credits/students${queryString ? `?${queryString}` : ''}`)
+}
+
+export function getStudentCredits(userId) {
+  return apiFetch(`/admin/credits/students/${userId}`)
+}
+
+export function adjustStudentCredits(userId, { amount, creditKind, reason }) {
+  return apiFetch(`/admin/credits/students/${userId}/adjustments`, {
+    method: 'POST',
+    body: { amount, creditKind, reason },
+  })
+}

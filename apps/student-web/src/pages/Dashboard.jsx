@@ -3,9 +3,12 @@ import { listMyBookings } from '../api/bookings.js'
 import { useLanguage } from '../context/LanguageContext.jsx'
 import { BookingCard } from '../components/BookingCard.jsx'
 import { ErrorMessage } from '../components/ErrorMessage.jsx'
+import { WalletSummary } from '../components/WalletSummary.jsx'
+import { useWallet } from '../context/WalletContext.jsx'
 
 export function Dashboard() {
   const { t } = useLanguage()
+  const { wallet } = useWallet()
   const [bookings, setBookings] = useState(null)
   const [error, setError] = useState(null)
 
@@ -23,6 +26,9 @@ export function Dashboard() {
   return (
     <section className="stack">
       <h1>{t('dashboard.title')}</h1>
+
+      <WalletSummary wallet={wallet} />
+
       {bookings.length === 0 && <p className="muted">{t('dashboard.empty')}</p>}
 
       {upcoming.length > 0 && (

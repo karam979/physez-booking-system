@@ -9,6 +9,9 @@ import { Bookings } from './pages/Bookings.jsx'
 import { BookingDetail } from './pages/BookingDetail.jsx'
 import { LessonEditor } from './pages/LessonEditor.jsx'
 import { Availability } from './pages/Availability.jsx'
+import { Community } from './pages/Community.jsx'
+import { CommunityQuestion } from './pages/CommunityQuestion.jsx'
+import { Credits } from './pages/Credits.jsx'
 import { NotFound } from './pages/NotFound.jsx'
 
 const protectedPages = [
@@ -17,6 +20,9 @@ const protectedPages = [
   ['/bookings/:id', <BookingDetail />],
   ['/lessons/:bookingId', <LessonEditor />],
   ['/availability', <Availability />],
+  ['/community', <Community />],
+  ['/community/:id', <CommunityQuestion />],
+  ['/credits', <Credits />],
 ]
 
 function App() {

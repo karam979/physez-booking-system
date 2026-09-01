@@ -9,6 +9,8 @@ import bookingsRoutes from './bookings/routes.js'
 import filesRoutes from './files/routes.js'
 import quizzesRoutes from './quizzes/routes.js'
 import progressRoutes from './progress/routes.js'
+import creditsRoutes from './credits/routes.js'
+import communityRoutes from './community/routes.js'
 import adminRoutes from './admin/routes.js'
 import internalRoutes from './internal/routes.js'
 
@@ -39,6 +41,8 @@ app.use('/api/bookings', bookingsRoutes)
 app.use('/api/files', filesRoutes)
 app.use('/api/quizzes', quizzesRoutes)
 app.use('/api/progress', progressRoutes)
+app.use('/api/credits', creditsRoutes)
+app.use('/api/community', communityRoutes)
 app.use('/api/admin', adminRoutes)
 app.use('/api/internal', internalRoutes)
 

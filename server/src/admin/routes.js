@@ -3,6 +3,8 @@ import { requireAuth, requireRole } from '../auth/middleware.js'
 import bookingsRoutes from './bookings.routes.js'
 import lessonsRoutes from './lessons.routes.js'
 import availabilityRoutes from './availability.routes.js'
+import creditsRoutes from './credits.routes.js'
+import communityRoutes from './community.routes.js'
 
 const router = Router()
 
@@ -11,5 +13,7 @@ router.use(requireAuth, requireRole('admin'))
 router.use('/bookings', lessonsRoutes)
 router.use('/bookings', bookingsRoutes)
 router.use('/availability', availabilityRoutes)
+router.use('/credits', creditsRoutes)
+router.use('/community', communityRoutes)
 
 export default router
