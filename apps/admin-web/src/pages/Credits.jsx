@@ -126,16 +126,27 @@ export function Credits() {
             <p className="muted">{t('credits.noTransactions')}</p>
           ) : (
             <ul className="window-list">
-              {wallet.transactions.map((entry) => (
-                <li key={entry.id}>
-                  <span className={entry.amount > 0 ? 'credit-plus' : 'credit-minus'}>
-                    {entry.amount > 0 ? `+${entry.amount}` : entry.amount}
-                  </span>
-                  <span>{t(`creditType.${entry.transactionType}`)}</span>
-                  <span className="muted">{entry.description}</span>
-                  <span className="muted">{formatDateTime(entry.createdAt, language)}</span>
-                </li>
-              ))}
+              {wallet.transactions.map((entry) => {
+                const label = t(`creditType.${entry.transactionType}`)
+                // A system reward stores its own label as the description, so
+                // only an admin adjustment has a reason worth showing as well.
+                const reason = entry.description === label ? null : entry.description
+                return (
+                  <li key={entry.id}>
+                    {/* <bdi> keeps a leading "+" leading in the ar/he layout. */}
+                    <bdi className={entry.amount > 0 ? 'credit-plus' : 'credit-minus'}>
+                      {entry.amount > 0 ? `+${entry.amount}` : entry.amount}
+                    </bdi>
+                    <span>{label}</span>
+                    {reason && (
+                      <span className="muted" dir="auto">
+                        {reason}
+                      </span>
+                    )}
+                    <span className="muted">{formatDateTime(entry.createdAt, language)}</span>
+                  </li>
+                )
+              })}
             </ul>
           )}
         </>

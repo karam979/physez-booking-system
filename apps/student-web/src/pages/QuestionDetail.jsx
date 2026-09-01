@@ -14,14 +14,12 @@ import { AnswerCard } from '../components/AnswerCard.jsx'
 import { ReportControl } from '../components/ReportControl.jsx'
 import { formatDateTime, topicName } from '../lib/format.js'
 import { LANGUAGE_NAMES } from '../i18n/index.js'
-import { useWallet } from '../context/WalletContext.jsx'
 
 const BODY_MIN = 10
 
 export function QuestionDetail() {
   const { id } = useParams()
   const { t, language } = useLanguage()
-  const { refreshWallet } = useWallet()
   const [refreshKey, setRefreshKey] = useState(0)
   const [body, setBody] = useState('')
   const [error, setError] = useState(null)
@@ -39,12 +37,12 @@ export function QuestionDetail() {
     setRefreshKey((key) => key + 1)
   }
 
-  // The server decides whether a reward was granted; the UI only reports it
-  // and then re-reads the wallet rather than adding up locally.
+  // A reward always goes to the answer's author, never to the student voting or
+  // accepting here, so this only reports it — the viewer's own balance is
+  // unchanged and does not need re-reading.
   function announceReward(reward) {
     if (reward?.granted) {
-      setNotice(t('community.rewardEarned', { n: reward.amount }))
-      refreshWallet()
+      setNotice(t('community.rewardGranted', { n: reward.amount }))
     } else {
       setNotice(null)
     }
@@ -89,7 +87,8 @@ export function QuestionDetail() {
   return (
     <section className="stack">
       <div className="booking-card-row">
-        <h1>{question.title}</h1>
+        {/* Student-written text keeps its own direction inside an ar/he UI. */}
+        <h1 dir="auto">{question.title}</h1>
         <span className={`badge badge-${question.isSolved ? 'confirmed' : 'pending'}`}>
           {t(question.isSolved ? 'community.solved' : 'community.open')}
         </span>
@@ -101,7 +100,9 @@ export function QuestionDetail() {
           {t('community.askedBy', { name: question.author.name })} ·{' '}
           {formatDateTime(question.createdAt, language)}
         </p>
-        <p className="question-body">{question.body}</p>
+        <p className="question-body" dir="auto">
+          {question.body}
+        </p>
 
         {!question.isOwn && (
           <div className="report-row">

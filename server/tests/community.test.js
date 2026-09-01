@@ -540,17 +540,128 @@ describe('reports', () => {
     expect((await admin.get('/api/admin/community/reports')).body).toHaveLength(2)
   })
 
-  it('lets a student report again once the first report is handled', async () => {
+  it('lets a student report again once an admin has handled the first', async () => {
     const { agent: asker } = await studentAgent()
     const { agent: reporter } = await studentAgent()
     const question = await ask(asker)
     const body = { targetType: 'question', targetId: question.id, reason: REASON }
 
     const first = await reporter.post('/api/community/reports').send(body)
+    expect((await reporter.post('/api/community/reports').send(body)).status).toBe(409)
+
     // The unique index is partial on 'open', so a handled report frees the slot.
-    await query(`UPDATE community_reports SET status = 'reviewed' WHERE id = $1`, [first.body.id])
+    const { agent: admin } = await adminAgent()
+    const handled = await admin
+      .patch(`/api/admin/community/reports/${first.body.id}/status`)
+      .send({ status: 'reviewed' })
+    expect(handled.status).toBe(200)
 
     expect((await reporter.post('/api/community/reports').send(body)).status).toBe(201)
+  })
+})
+
+describe('admin report moderation', () => {
+  const REASON = 'This needs a teacher to take a look.'
+
+  async function reportBoth() {
+    const { agent: asker } = await studentAgent()
+    const { agent: helper } = await studentAgent()
+    const question = await ask(asker)
+    const posted = await answer(helper, question.id)
+
+    await helper
+      .post('/api/community/reports')
+      .send({ targetType: 'question', targetId: question.id, reason: REASON })
+    await asker
+      .post('/api/community/reports')
+      .send({ targetType: 'answer', targetId: posted.id, reason: REASON })
+    return { question, posted }
+  }
+
+  it('shows what was reported, not just its id', async () => {
+    const { question, posted } = await reportBoth()
+    const { agent: admin } = await adminAgent()
+
+    const res = await admin.get('/api/admin/community/reports')
+    expect(res.status).toBe(200)
+    expect(res.body).toHaveLength(2)
+
+    const onQuestion = res.body.find((r) => r.targetType === 'question')
+    expect(onQuestion.target).toMatchObject({ questionId: question.id, excerpt: QUESTION.title })
+    expect(onQuestion.reporter.name).toBeTruthy()
+    expect(onQuestion.reason).toBe(REASON)
+    expect(onQuestion.status).toBe('open')
+
+    // An answer report points at the question so an admin can open the thread.
+    const onAnswer = res.body.find((r) => r.targetType === 'answer')
+    expect(onAnswer.target.questionId).toBe(question.id)
+    expect(onAnswer.target.excerpt).toContain('Gravity pulls it')
+    expect(onAnswer.targetId).toBe(posted.id)
+  })
+
+  it('filters the queue by status', async () => {
+    await reportBoth()
+    const { agent: admin } = await adminAgent()
+
+    const open = await admin.get('/api/admin/community/reports?status=open')
+    expect(open.body).toHaveLength(2)
+
+    await admin
+      .patch(`/api/admin/community/reports/${open.body[0].id}/status`)
+      .send({ status: 'dismissed' })
+
+    expect((await admin.get('/api/admin/community/reports?status=open')).body).toHaveLength(1)
+    expect((await admin.get('/api/admin/community/reports?status=dismissed')).body).toHaveLength(1)
+    expect((await admin.get('/api/admin/community/reports')).body).toHaveLength(2)
+
+    const bad = await admin.get('/api/admin/community/reports?status=nonsense')
+    expect(bad.status).toBe(400)
+  })
+
+  it('marks a report reviewed or dismissed without touching the content', async () => {
+    const { question } = await reportBoth()
+    const { agent: admin } = await adminAgent()
+    const [first] = (await admin.get('/api/admin/community/reports')).body
+
+    const res = await admin
+      .patch(`/api/admin/community/reports/${first.id}/status`)
+      .send({ status: 'reviewed' })
+    expect(res.status).toBe(200)
+    expect(res.body.status).toBe('reviewed')
+
+    // Moderation records a decision; it never removes the reported content.
+    const detail = await admin.get(`/api/admin/community/questions/${question.id}`)
+    expect(detail.status).toBe(200)
+    expect(detail.body.answers).toHaveLength(1)
+  })
+
+  it('rejects an invalid decision and an unknown report', async () => {
+    await reportBoth()
+    const { agent: admin } = await adminAgent()
+    const [first] = (await admin.get('/api/admin/community/reports')).body
+
+    const bad = await admin
+      .patch(`/api/admin/community/reports/${first.id}/status`)
+      .send({ status: 'open' })
+    expect(bad.status).toBe(400)
+    expect(bad.body.error.details.status).toBe('INVALID')
+
+    const missing = await admin
+      .patch('/api/admin/community/reports/00000000-0000-4000-8000-000000000000/status')
+      .send({ status: 'reviewed' })
+    expect(missing.status).toBe(404)
+  })
+
+  it('is admin-only', async () => {
+    const { agent: student } = await studentAgent()
+    expect((await student.get('/api/admin/community/reports')).status).toBe(403)
+    expect(
+      (
+        await student
+          .patch('/api/admin/community/reports/00000000-0000-4000-8000-000000000000/status')
+          .send({ status: 'reviewed' })
+      ).status,
+    ).toBe(403)
   })
 })
 

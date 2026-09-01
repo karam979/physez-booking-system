@@ -55,8 +55,13 @@ export async function createSlot(startAt, endAt, { isActive = true } = {}) {
   return rows[0].id
 }
 
-// ISO instant on the fixed future test date 2026-09-01 (UTC).
-export const t = (h, m = 0) =>
-  `2026-09-01T${String(h).padStart(2, '0')}:${String(m).padStart(2, '0')}:00.000Z`
+// The booking API refuses a start time in the past, so the fixtures need a day
+// that is always ahead of the clock. A hard-coded date silently rots: the whole
+// suite starts failing the moment real time passes the slot hours on that day.
+const TEST_DAY_OFFSET_MS = 7 * 24 * 60 * 60 * 1000
 
-export const TEST_DATE = '2026-09-01'
+export const TEST_DATE = new Date(Date.now() + TEST_DAY_OFFSET_MS).toISOString().slice(0, 10)
+
+// ISO instant at a given hour on the test date (UTC).
+export const t = (h, m = 0) =>
+  `${TEST_DATE}T${String(h).padStart(2, '0')}:${String(m).padStart(2, '0')}:00.000Z`

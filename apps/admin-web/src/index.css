@@ -728,3 +728,63 @@ a {
 .credit-minus {
   color: var(--danger-text);
 }
+
+/* Questions / Reports switch on the community page. The underline sits on the
+   block edge so it reads the same in ar/he. */
+.tab-row {
+  display: flex;
+  gap: 1rem;
+  border-block-end: 1px solid var(--border);
+}
+
+.tab {
+  padding: 0.5rem 0.25rem;
+  border: 0;
+  background: none;
+  color: var(--muted);
+  font: inherit;
+  cursor: pointer;
+  border-block-end: 2px solid transparent;
+  margin-block-end: -1px;
+}
+
+.tab:hover {
+  color: var(--text);
+}
+
+.tab-active {
+  color: var(--text);
+  font-weight: 600;
+  border-block-end-color: var(--accent);
+}
+
+.report-kind {
+  display: block;
+  color: var(--muted);
+  font-size: 0.85rem;
+}
+
+/* Two long free-text columns would otherwise squeeze the table down to one
+   word per line, so keep a readable width and let .table-wrap scroll instead. */
+.report-table {
+  min-inline-size: 58rem;
+}
+
+.report-target {
+  max-inline-size: 22rem;
+  overflow-wrap: anywhere;
+}
+
+.report-reason {
+  max-inline-size: 18rem;
+}
+
+.report-when {
+  white-space: nowrap;
+}
+
+.report-actions {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+}

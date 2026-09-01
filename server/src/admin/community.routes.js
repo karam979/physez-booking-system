@@ -2,7 +2,7 @@ import { Router } from 'express'
 import { query } from '../db.js'
 import { apiError } from '../errors.js'
 import { isUuid, LANGUAGES } from '../validate.js'
-import { QUESTION_STATUSES } from '../community/rewards.js'
+import { QUESTION_STATUSES, REPORT_STATUSES, REPORT_DECISIONS } from '../community/rewards.js'
 import { serializeQuestionSummary, serializeQuestionDetail } from '../community/serialize.js'
 
 const router = Router()
@@ -124,25 +124,85 @@ router.patch('/questions/:id/status', async (req, res, next) => {
   }
 })
 
-// GET /api/admin/community/reports — basic moderation queue.
+const EXCERPT_LENGTH = 200
+
+// What was reported, so the queue is readable without opening every item. The
+// target may already be gone, in which case there is nothing left to show.
+function reportTarget(row) {
+  if (row.target_type === 'question' && row.question_id) {
+    return { questionId: row.question_id, excerpt: row.question_title }
+  }
+  if (row.target_type === 'answer' && row.answer_id) {
+    return {
+      questionId: row.answer_question_id,
+      excerpt: row.answer_body.slice(0, EXCERPT_LENGTH),
+    }
+  }
+  return null
+}
+
+function serializeReport(row) {
+  return {
+    id: row.id,
+    reporter: { id: row.reporter_user_id, name: row.reporter_name },
+    targetType: row.target_type,
+    targetId: row.target_id,
+    target: reportTarget(row),
+    reason: row.reason,
+    status: row.status,
+    createdAt: row.created_at.toISOString(),
+  }
+}
+
+// GET /api/admin/community/reports?status= — the moderation queue.
 router.get('/reports', async (req, res, next) => {
   try {
+    const { status } = req.query
+    if (status !== undefined && !REPORT_STATUSES.includes(status)) {
+      return res
+        .status(400)
+        .json(apiError('VALIDATION_ERROR', 'Invalid report filter.', { status: 'INVALID' }))
+    }
+
     const { rows } = await query(
-      `SELECT r.*, u.name AS reporter_name
-       FROM community_reports r JOIN users u ON u.id = r.reporter_user_id
+      `SELECT r.*, u.name AS reporter_name,
+              q.id AS question_id, q.title AS question_title,
+              a.id AS answer_id, a.body AS answer_body, a.question_id AS answer_question_id
+       FROM community_reports r
+       JOIN users u ON u.id = r.reporter_user_id
+       LEFT JOIN community_questions q ON r.target_type = 'question' AND q.id = r.target_id
+       LEFT JOIN community_answers a ON r.target_type = 'answer' AND a.id = r.target_id
+       WHERE ($1::text IS NULL OR r.status = $1)
        ORDER BY r.created_at DESC LIMIT 100`,
+      [status ?? null],
     )
-    res.json(
-      rows.map((row) => ({
-        id: row.id,
-        reporter: { id: row.reporter_user_id, name: row.reporter_name },
-        targetType: row.target_type,
-        targetId: row.target_id,
-        reason: row.reason,
-        status: row.status,
-        createdAt: row.created_at.toISOString(),
-      })),
+    res.json(rows.map(serializeReport))
+  } catch (err) {
+    next(err)
+  }
+})
+
+// PATCH /api/admin/community/reports/:id/status — mark a report handled.
+// Moderation records a decision; it never deletes the reported content.
+router.patch('/reports/:id/status', async (req, res, next) => {
+  try {
+    const { id } = req.params
+    const { status } = req.body ?? {}
+    const details = {}
+    if (!isUuid(id)) details.id = 'INVALID'
+    if (!REPORT_DECISIONS.includes(status)) details.status = 'INVALID'
+    if (Object.keys(details).length > 0) {
+      return res.status(400).json(apiError('VALIDATION_ERROR', 'Invalid report decision.', details))
+    }
+
+    const { rows } = await query(
+      `UPDATE community_reports SET status = $2 WHERE id = $1 RETURNING id, status`,
+      [id, status],
     )
+    if (rows.length === 0) {
+      return res.status(404).json(apiError('NOT_FOUND', 'Report not found.'))
+    }
+    res.json({ id: rows[0].id, status: rows[0].status })
   } catch (err) {
     next(err)
   }

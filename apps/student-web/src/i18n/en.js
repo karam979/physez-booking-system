@@ -167,7 +167,7 @@ export const en = {
   'community.markHelpful': 'Helpful',
   'community.undoHelpful': 'Undo helpful',
   'community.helpfulCount': '{n} found this helpful',
-  'community.rewardEarned': '+{n} credits earned',
+  'community.rewardGranted': 'The answer author earned +{n} credits.',
   'community.closedNotice': 'This question is closed and cannot receive new answers.',
   'community.backToList': 'Back to the community',
   'community.report': 'Report',

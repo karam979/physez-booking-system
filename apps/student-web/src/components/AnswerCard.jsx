@@ -9,7 +9,10 @@ export function AnswerCard({ answer, canAccept, busy, onVote, onUnvote, onAccept
     <article className={`card stack ${answer.isAccepted ? 'answer-accepted' : ''}`}>
       {answer.isAccepted && <p className="accepted-flag">✓ {t('community.acceptedAnswer')}</p>}
 
-      <p className="answer-body">{answer.body}</p>
+      {/* Student-written text: its own direction, not the UI's. */}
+      <p className="answer-body" dir="auto">
+        {answer.body}
+      </p>
 
       <div className="booking-card-row muted">
         <span>{t('community.answeredBy', { name: answer.author.name })}</span>

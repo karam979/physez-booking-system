@@ -14,6 +14,12 @@ export const MAX_REWARD_CREDITS_PER_WEEK = 60
 export const QUESTION_STATUSES = ['open', 'solved', 'closed']
 export const REPORT_TARGET_TYPES = ['question', 'answer']
 
+// A report is filed as 'open'; an admin then marks it one of the decisions.
+// Reviewing or dismissing also frees the reporter to file again later, because
+// the duplicate-report index only covers open rows.
+export const REPORT_STATUSES = ['open', 'reviewed', 'dismissed']
+export const REPORT_DECISIONS = ['reviewed', 'dismissed']
+
 export const TITLE_MAX_LENGTH = 200
 export const BODY_MAX_LENGTH = 5000
 

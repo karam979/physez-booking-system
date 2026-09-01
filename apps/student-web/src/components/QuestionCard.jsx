@@ -9,7 +9,9 @@ export function QuestionCard({ question }) {
   return (
     <Link to={`/community/questions/${question.id}`} className="card booking-card">
       <div className="booking-card-row">
-        <strong>{question.title}</strong>
+        {/* Written by a student in any language, so let the browser pick the
+            direction rather than inheriting the UI's. */}
+        <strong dir="auto">{question.title}</strong>
         <span className={`badge badge-${question.isSolved ? 'confirmed' : 'pending'}`}>
           {t(question.isSolved ? 'community.solved' : 'community.open')}
         </span>

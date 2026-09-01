@@ -167,7 +167,7 @@ export const he = {
   'community.markHelpful': 'מועיל',
   'community.undoHelpful': 'ביטול הסימון',
   'community.helpfulCount': '{n} מצאו את זה מועיל',
-  'community.rewardEarned': 'זכיתם ב־{n} קרדיטים',
+  'community.rewardGranted': 'כותב התשובה קיבל {n} קרדיטים.',
   'community.closedNotice': 'השאלה סגורה ולא ניתן להוסיף תשובות.',
   'community.backToList': 'חזרה לקהילה',
   'community.report': 'דיווח',

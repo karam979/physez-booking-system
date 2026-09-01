@@ -756,6 +756,14 @@ fieldset {
   justify-content: flex-end;
 }
 
+/* "Report" is deliberately small type, but a 25px-tall link is a poor touch
+   target. Grow the hit area to the 44px guideline without enlarging the text. */
+.report-row .link-button {
+  display: inline-flex;
+  align-items: center;
+  min-block-size: 44px;
+}
+
 .report-form {
   border-block-start: 1px solid var(--border);
   padding-block-start: 0.75rem;

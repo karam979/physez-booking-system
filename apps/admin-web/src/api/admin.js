@@ -78,6 +78,17 @@ export function setQuestionStatus(id, status) {
   return apiFetch(`/admin/community/questions/${id}/status`, { method: 'PATCH', body: { status } })
 }
 
+export function listCommunityReports({ status } = {}) {
+  const params = new URLSearchParams()
+  if (status) params.set('status', status)
+  const queryString = params.toString()
+  return apiFetch(`/admin/community/reports${queryString ? `?${queryString}` : ''}`)
+}
+
+export function setReportStatus(id, status) {
+  return apiFetch(`/admin/community/reports/${id}/status`, { method: 'PATCH', body: { status } })
+}
+
 export function listCreditStudents(search) {
   const params = new URLSearchParams()
   if (search) params.set('search', search)

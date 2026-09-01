@@ -167,7 +167,7 @@ export const ar = {
   'community.markHelpful': 'مفيدة',
   'community.undoHelpful': 'التراجع عن التقييم',
   'community.helpfulCount': '{n} وجدوها مفيدة',
-  'community.rewardEarned': 'حصلت على {n} رصيد',
+  'community.rewardGranted': 'حصل صاحب الإجابة على {n} من الرصيد.',
   'community.closedNotice': 'هذا السؤال مغلق ولا يقبل إجابات جديدة.',
   'community.backToList': 'العودة إلى المجتمع',
   'community.report': 'إبلاغ',

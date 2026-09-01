@@ -162,7 +162,7 @@ describe('POST /api/bookings/:id/reschedule', () => {
 
     const outside = await agent
       .post(`/api/bookings/${booking.id}/reschedule`)
-      .send({ startAt: '2026-09-01T20:00:00.000Z' })
+      .send({ startAt: t(20) })
     expect(outside.status).toBe(409)
     expect(outside.body.error.code).toBe('SLOT_UNAVAILABLE')
 

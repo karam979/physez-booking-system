@@ -42,7 +42,8 @@ export function CommunityQuestion() {
   return (
     <section className="stack">
       <div className="booking-card-row">
-        <h1>{question.title}</h1>
+        {/* Student-written content keeps its own direction in an ar/he UI. */}
+        <h1 dir="auto">{question.title}</h1>
         <span className="muted">{t(`community.status.${question.status}`)}</span>
       </div>
 
@@ -52,7 +53,9 @@ export function CommunityQuestion() {
           {t('community.askedBy', { name: question.author.name })} ·{' '}
           {formatDateTime(question.createdAt, language)}
         </p>
-        <p className="question-body">{question.body}</p>
+        <p className="question-body" dir="auto">
+          {question.body}
+        </p>
       </article>
 
       <ErrorMessage error={error} />
@@ -84,7 +87,9 @@ export function CommunityQuestion() {
         {question.answers.map((answer) => (
           <article key={answer.id} className="card stack">
             {answer.isAccepted && <p className="accepted-flag">✓ {t('community.accepted')}</p>}
-            <p className="answer-body">{answer.body}</p>
+            <p className="answer-body" dir="auto">
+              {answer.body}
+            </p>
             <p className="muted">
               {t('community.answeredBy', { name: answer.author.name })} ·{' '}
               {t('community.helpfulCount', { n: answer.voteCount })} ·{' '}
