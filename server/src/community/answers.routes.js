@@ -13,7 +13,7 @@ const UNIQUE_VIOLATION = '23505'
 function loadAnswerRow(client, answerId) {
   return client.query(
     `SELECT a.*, q.user_id AS question_author_id, q.status AS question_status,
-            q.accepted_answer_id
+            q.accepted_answer_id, q.deleted_at AS question_deleted_at
      FROM community_answers a
      JOIN community_questions q ON q.id = a.question_id
      WHERE a.id = $1
@@ -38,7 +38,12 @@ router.post('/questions/:id/answers', async (req, res, next) => {
         .json(apiError('VALIDATION_ERROR', 'Invalid answer.', { body: 'INVALID' }))
     }
 
-    const question = await query(`SELECT id, status FROM community_questions WHERE id = $1`, [id])
+    // A removed question is indistinguishable from a missing one here, so
+    // students learn nothing from the difference.
+    const question = await query(
+      `SELECT id, status FROM community_questions WHERE id = $1 AND deleted_at IS NULL`,
+      [id],
+    )
     if (question.rows.length === 0) {
       return res.status(404).json(apiError('NOT_FOUND', 'Question not found.'))
     }
@@ -83,6 +88,11 @@ router.post('/answers/:answerId/votes', async (req, res, next) => {
     const answerResult = await loadAnswerRow(client, answerId)
     const answer = answerResult.rows[0]
     if (!answer) {
+      await client.query('ROLLBACK')
+      return res.status(404).json(apiError('NOT_FOUND', 'Answer not found.'))
+    }
+    // Answer ids must not be a back door into a removed question.
+    if (answer.question_deleted_at) {
       await client.query('ROLLBACK')
       return res.status(404).json(apiError('NOT_FOUND', 'Answer not found.'))
     }
@@ -147,6 +157,16 @@ router.delete('/answers/:answerId/votes', async (req, res, next) => {
         .status(400)
         .json(apiError('VALIDATION_ERROR', 'Answer id must be a UUID.', { answerId: 'INVALID' }))
     }
+    const live = await query(
+      `SELECT a.id FROM community_answers a
+       JOIN community_questions q ON q.id = a.question_id
+       WHERE a.id = $1 AND q.deleted_at IS NULL`,
+      [answerId],
+    )
+    if (live.rows.length === 0) {
+      return res.status(404).json(apiError('NOT_FOUND', 'Answer not found.'))
+    }
+
     const removed = await query(
       `DELETE FROM community_votes WHERE answer_id = $1 AND user_id = $2 RETURNING id`,
       [answerId, req.user.id],
@@ -179,7 +199,7 @@ router.post('/answers/:answerId/accept', async (req, res, next) => {
 
     const answerResult = await loadAnswerRow(client, answerId)
     const answer = answerResult.rows[0]
-    if (!answer) {
+    if (!answer || answer.question_deleted_at) {
       await client.query('ROLLBACK')
       return res.status(404).json(apiError('NOT_FOUND', 'Answer not found.'))
     }

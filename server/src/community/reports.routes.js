@@ -12,11 +12,15 @@ const router = Router()
 
 const UNIQUE_VIOLATION = '23505'
 
-// Each reportable kind maps to the table the target must exist in. The table
-// name is only ever read from this allow-list, never from the request body.
-const TARGET_TABLES = {
-  question: 'community_questions',
-  answer: 'community_answers',
+// Each reportable kind maps to the query that proves the target is something
+// this student can still see. The SQL is only ever read from this allow-list,
+// never built from the request body. Both variants exclude content whose
+// question an admin removed, so a removed thread cannot be reported.
+const TARGET_LOOKUPS = {
+  question: `SELECT id FROM community_questions WHERE id = $1 AND deleted_at IS NULL`,
+  answer: `SELECT a.id FROM community_answers a
+           JOIN community_questions q ON q.id = a.question_id
+           WHERE a.id = $1 AND q.deleted_at IS NULL`,
 }
 
 // POST /api/community/reports — a student flags a question or an answer.
@@ -45,9 +49,7 @@ router.post('/', async (req, res, next) => {
       return res.status(400).json(apiError('VALIDATION_ERROR', 'Invalid report.', details))
     }
 
-    const target = await query(`SELECT id FROM ${TARGET_TABLES[targetType]} WHERE id = $1`, [
-      targetId,
-    ])
+    const target = await query(TARGET_LOOKUPS[targetType], [targetId])
     if (target.rows.length === 0) {
       return res.status(404).json(apiError('NOT_FOUND', 'The reported content does not exist.'))
     }

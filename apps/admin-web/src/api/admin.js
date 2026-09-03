@@ -62,10 +62,11 @@ export function fileDownloadUrl(fileId) {
   return `/api/files/${fileId}`
 }
 
-export function listCommunityQuestions({ status, language } = {}) {
+export function listCommunityQuestions({ status, language, removed } = {}) {
   const params = new URLSearchParams()
   if (status) params.set('status', status)
   if (language) params.set('language', language)
+  if (removed) params.set('removed', removed)
   const queryString = params.toString()
   return apiFetch(`/admin/community/questions${queryString ? `?${queryString}` : ''}`)
 }
@@ -76,6 +77,16 @@ export function getCommunityQuestion(id) {
 
 export function setQuestionStatus(id, status) {
   return apiFetch(`/admin/community/questions/${id}/status`, { method: 'PATCH', body: { status } })
+}
+
+// Soft delete and restore share one endpoint: removed=true hides the question
+// from students, removed=false brings it back. Neither touches its answers,
+// votes, reports or the credits already earned from it.
+export function setQuestionRemoval(id, { removed, reason }) {
+  return apiFetch(`/admin/community/questions/${id}/removal`, {
+    method: 'PATCH',
+    body: { removed, reason },
+  })
 }
 
 export function listCommunityReports({ status } = {}) {

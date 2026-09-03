@@ -26,3 +26,8 @@ export const BODY_MAX_LENGTH = 5000
 // A report has to say something an admin can act on, so a few words minimum.
 export const REPORT_REASON_MIN_LENGTH = 10
 export const REPORT_REASON_MAX_LENGTH = 500
+
+// Removing a question is a soft delete, and the reason is the audit trail an
+// admin leaves behind, so it has to be written down.
+export const REMOVAL_REASON_MIN_LENGTH = 5
+export const REMOVAL_REASON_MAX_LENGTH = 500

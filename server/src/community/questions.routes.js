@@ -9,6 +9,11 @@ const router = Router()
 
 const MAX_PAGE_SIZE = 50
 
+// A question an admin removed is invisible to students everywhere, so the
+// filter lives in the query rather than in the React layer. LIVE_ONLY is
+// appended to every student-facing read in this file.
+const LIVE_ONLY = `q.deleted_at IS NULL`
+
 const QUESTION_SELECT = `
   SELECT q.*, u.name AS author_name, u.id AS author_id,
          t.name_en, t.name_ar, t.name_he,
@@ -36,7 +41,7 @@ router.get('/', async (req, res, next) => {
       return res.status(400).json(apiError('VALIDATION_ERROR', 'Invalid filters.', details))
     }
 
-    const where = []
+    const where = [LIVE_ONLY]
     const params = []
     if (topicId !== undefined) {
       params.push(topicId)
@@ -57,7 +62,7 @@ router.get('/', async (req, res, next) => {
     params.push(size, skip)
     const { rows } = await query(
       `${QUESTION_SELECT}
-       ${where.length > 0 ? `WHERE ${where.join(' AND ')}` : ''}
+       WHERE ${where.join(' AND ')}
        ORDER BY q.created_at DESC
        LIMIT $${params.length - 1} OFFSET $${params.length}`,
       params,
@@ -66,7 +71,7 @@ router.get('/', async (req, res, next) => {
     const countParams = params.slice(0, params.length - 2)
     const total = await query(
       `SELECT count(*)::int AS n FROM community_questions q
-       ${where.length > 0 ? `WHERE ${where.join(' AND ')}` : ''}`,
+       WHERE ${where.join(' AND ')}`,
       countParams,
     )
 
@@ -126,7 +131,9 @@ router.get('/:id', async (req, res, next) => {
         .status(400)
         .json(apiError('VALIDATION_ERROR', 'Question id must be a UUID.', { id: 'INVALID' }))
     }
-    const { rows } = await query(`${QUESTION_SELECT} WHERE q.id = $1`, [id])
+    // A removed question is a 404 for students: same response as one that
+    // never existed, so removal leaks nothing.
+    const { rows } = await query(`${QUESTION_SELECT} WHERE q.id = $1 AND ${LIVE_ONLY}`, [id])
     const question = rows[0]
     if (!question) {
       return res.status(404).json(apiError('NOT_FOUND', 'Question not found.'))

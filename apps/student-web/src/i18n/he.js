@@ -2,6 +2,9 @@ export const he = {
   'app.name': 'PhysEZ',
   'app.loading': 'טוען…',
 
+  'greeting.withName': 'שלום, {name} 👋',
+  'greeting.fallback': 'שלום 👋',
+
   'nav.dashboard': 'השיעורים שלי',
   'nav.book': 'קביעת שיעור',
   'nav.progress': 'ההתקדמות שלי',

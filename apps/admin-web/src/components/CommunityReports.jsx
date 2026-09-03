@@ -83,9 +83,13 @@ export function CommunityReports() {
                         <Link to={`/community/${report.target.questionId}`} dir="auto">
                           {report.target.excerpt}
                         </Link>
-                      ) : (
-                        <span className="muted">{t('reports.targetGone')}</span>
+                      ) : null}
+                      {/* A removed thread keeps its report readable so an admin
+                          still has the context behind it. */}
+                      {report.target?.removed && (
+                        <span className="report-kind">{t('removal.targetRemoved')}</span>
                       )}
+                      {!report.target && <span className="muted">{t('reports.targetGone')}</span>}
                     </td>
                     <td>{report.reporter.name}</td>
                     <td className="report-reason" dir="auto">

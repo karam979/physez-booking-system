@@ -13,6 +13,13 @@ export function Layout({ children }) {
         <Link to="/" className="brand">
           {t('app.name')}
         </Link>
+        {/* The signed-in name already comes from AuthContext's /api/auth/me
+            hydration, so greeting the student costs no extra request. */}
+        {user && (
+          <p className="greeting" dir="auto">
+            {user.name ? t('greeting.withName', { name: user.name }) : t('greeting.fallback')}
+          </p>
+        )}
         <nav className="nav">
           {user ? (
             <>

@@ -3,8 +3,19 @@ function author(row) {
   return { id: row.author_id, name: row.author_name }
 }
 
-export function serializeQuestionSummary(row, { viewerId } = {}) {
+// Removal audit data is admin-only: student routes never pass includeRemoval,
+// so deletion_reason and the admin who acted cannot leak into the feed.
+function removal(row) {
+  if (!row.deleted_at) return null
   return {
+    removedAt: row.deleted_at.toISOString(),
+    removedBy: row.deleted_by ? { id: row.deleted_by, name: row.deleted_by_name ?? null } : null,
+    reason: row.deletion_reason,
+  }
+}
+
+export function serializeQuestionSummary(row, { viewerId, includeRemoval } = {}) {
+  const summary = {
     id: row.id,
     title: row.title,
     language: row.language,
@@ -18,11 +29,16 @@ export function serializeQuestionSummary(row, { viewerId } = {}) {
     author: author(row),
     createdAt: row.created_at.toISOString(),
   }
+  if (includeRemoval) {
+    summary.isRemoved = Boolean(row.deleted_at)
+    summary.removal = removal(row)
+  }
+  return summary
 }
 
-export function serializeQuestionDetail(row, answers, { viewerId } = {}) {
+export function serializeQuestionDetail(row, answers, { viewerId, includeRemoval } = {}) {
   return {
-    ...serializeQuestionSummary(row, { viewerId }),
+    ...serializeQuestionSummary(row, { viewerId, includeRemoval }),
     body: row.body,
     acceptedAnswerId: row.accepted_answer_id,
     updatedAt: row.updated_at.toISOString(),

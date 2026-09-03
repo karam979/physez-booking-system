@@ -9,6 +9,7 @@ import { formatDateTime, topicName } from '../lib/format.js'
 import { LANGUAGE_NAMES } from '../i18n/index.js'
 
 const STATUSES = ['open', 'solved', 'closed']
+const REMOVED_VIEWS = ['excluded', 'included', 'only']
 
 export function Community() {
   const { t, language } = useLanguage()
@@ -16,6 +17,7 @@ export function Community() {
 
   const status = searchParams.get('status') ?? ''
   const questionLanguage = searchParams.get('language') ?? ''
+  const removed = searchParams.get('removed') ?? 'excluded'
   // Reports live behind a tab rather than their own route, so /community/:id
   // stays unambiguous.
   const showReports = searchParams.get('view') === 'reports'
@@ -27,8 +29,9 @@ export function Community() {
         : listCommunityQuestions({
             status: status || undefined,
             language: questionLanguage || undefined,
+            removed,
           }),
-    [showReports, status, questionLanguage],
+    [showReports, status, questionLanguage, removed],
   )
   const { data: questions, error, loading } = useFetch(fetchQuestions)
 
@@ -77,6 +80,16 @@ export function Community() {
               </select>
             </label>
             <label>
+              {t('removal.filter')}
+              <select value={removed} onChange={(e) => updateFilter('removed', e.target.value)}>
+                {REMOVED_VIEWS.map((value) => (
+                  <option key={value} value={value}>
+                    {t(`removal.view.${value}`)}
+                  </option>
+                ))}
+              </select>
+            </label>
+            <label>
               {t('community.filterLanguage')}
               <select
                 value={questionLanguage}
@@ -120,7 +133,11 @@ export function Community() {
                         </td>
                         <td>{topicName(question.topic, language)}</td>
                         <td>{question.answerCount}</td>
-                        <td>{t(`community.status.${question.status}`)}</td>
+                        <td>
+                          {question.isRemoved
+                            ? t('removal.badge')
+                            : t(`community.status.${question.status}`)}
+                        </td>
                         <td>{formatDateTime(question.createdAt, language)}</td>
                       </tr>
                     ))}

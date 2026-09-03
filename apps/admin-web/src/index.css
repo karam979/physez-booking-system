@@ -787,4 +787,37 @@ a {
   display: flex;
   align-items: center;
   gap: 0.75rem;
+  flex-wrap: wrap;
+}
+
+/* Removing a question hides a whole thread, so the control is coloured like
+   the destructive action it is rather than like an ordinary button. */
+.button-danger {
+  font: inherit;
+  font-weight: 600;
+  padding: 0.55rem 1rem;
+  border-radius: var(--radius-small);
+  cursor: pointer;
+  color: var(--danger-text);
+  background: var(--danger-soft);
+  border: 1px solid var(--danger-border);
+  justify-self: start;
+}
+
+.button-danger:hover:not(:disabled) {
+  background: var(--danger-border);
+}
+
+.button-danger:disabled {
+  opacity: 0.55;
+  cursor: not-allowed;
+}
+
+.removal-form {
+  border-color: var(--danger-border);
+}
+
+.removal-notice {
+  border-color: var(--danger-border);
+  background: var(--danger-soft);
 }

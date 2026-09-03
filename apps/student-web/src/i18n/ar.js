@@ -2,6 +2,9 @@ export const ar = {
   'app.name': 'PhysEZ',
   'app.loading': 'جارٍ التحميل…',
 
+  'greeting.withName': 'مرحبًا، {name} 👋',
+  'greeting.fallback': 'مرحبًا 👋',
+
   'nav.dashboard': 'دروسي',
   'nav.book': 'احجز درسًا',
   'nav.progress': 'تقدّمي',
